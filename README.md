@@ -37,10 +37,11 @@ Inventory Management
 Stock deduction after checkout
 Out-of-stock detection
 Inventory refresh after purchase
-💻 Technologies Used
-Technology	Purpose
-HTML5	Structure
-CSS3	Styling & Responsive Design
-JavaScript (ES6)	Application Logic
-Fetch API	Real-Time Currency Conversion
-Exchange Rate API	Live Exchange Rates
+table for technologies used
+| Technology        | Purpose                       |
+| ----------------- | ----------------------------- |
+| HTML5             | Structure                     |
+| CSS3              | Styling & Responsive Design   |
+| JavaScript (ES6)  | Application Logic             |
+| Fetch API         | Real-Time Currency Conversion |
+| Exchange Rate API | Live Exchange Rates           |
