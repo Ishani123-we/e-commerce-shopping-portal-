@@ -6,8 +6,8 @@ The E-Commerce Shopping Portal is a responsive web-based shopping application de
 
 The application demonstrates front-end web development concepts, API integration, inventory management, shopping cart functionality, and dynamic invoice generation.
 
-🚀 Features
-Product Catalog
+🚀 Features \n
+Product Catalog\n
 View available products
 Product stock management
 Real-time inventory updates
