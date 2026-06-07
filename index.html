@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce Portal Dashboard (INR Base)</title>
+    <style>
+        :root {
+            --primary: #da3743;
+            --success: #16a34a;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light);
+            color: var(--dark);
+        }
+
+        header {
+            background-color: var(--dark);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .product-card {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            text-align: center;
+            background: #ffffff;
+            transition: transform 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 0.5rem 0;
+        }
+
+        .stock-tag {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .btn-success:hover {
+            background-color: #15803d;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .cart-total {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 0.5rem;
+            margin: 0.5rem 0 1rem 0;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        #invoice {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>E-Commerce Shopping Portal</h1>
+        <div id="user-badge">Logged in as: <strong>Premium Shopper</strong></div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>Available Product Catalog (Prices in ₹)</h2>
+            <div class="product-grid" id="catalog-container"></div>
+        </div>
+
+        <div>
+            <div class="card" style="margin-bottom: 2rem;">
+                <h2>Your Shopping Cart</h2>
+                <div id="cart-items-container">
+                    <p style="color: #64748b;">Your cart is currently empty.</p>
+                </div>
+                <div class="cart-total" id="cart-total-display">Total: ₹0.00 INR</div>
+            </div>
+
+            <div class="card">
+                <h2>Secure API Gateway Payment</h2>
+                <label for="currency-select">Select Settlement Currency:</label>
+                <select id="currency-select">
+                    <option value="INR">INR (₹) - Base Currency</option>
+                    <option value="USD">USD ($) - Live API Rate</option>
+                    <option value="EUR">EUR (€) - Live API Rate</option>
+                    <option value="GBP">GBP (£) - Live API Rate</option>
+                </select>
+
+                <label for="promo-check">
+                    <input type="checkbox" id="promo-check" style="width: auto; margin-right: 0.5rem;" checked> Apply Premium Member Discount (10%)
+                </label>
+
+                <button class="btn-success" onclick="processCheckout()">Finalize & Generate Invoice</button>
+
+                <div id="invoice">
+                    <h3 style="color: var(--success); margin-top:0;">✓ Order Completed Successfully!</h3>
+                    <div id="invoice-details"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+  
+        const products = [
+            { id: "P101", name: "MacBook Pro M3", price: 169900.00, stock: 5 },
+            { id: "P102", name: "iPhone 15 Pro", price: 129900.00, stock: 10 },
+            { id: "P103", name: "Sony WH-1000XM5", price: 29999.00, stock: 15 },
+            { id: "P104", name: "Mechanical Keyboard", price: 6500.00, stock: 30 }
+        ];
+
+        let cart = {};
+
+        function renderCatalog() {
+            const container = document.getElementById('catalog-container');
+            container.innerHTML = '';
+            products.forEach(product => {
+                container.innerHTML += `
+                    <div class="product-card">
+                        <h3>${product.name}</h3>
+                        <div class="product-price">₹${product.price.toLocaleString('en-IN')}</div>
+                        <div class="stock-tag">Units Available: ${product.stock}</div>
+                        <button onclick="addToCart('${product.id}')" ${product.stock === 0 ? 'disabled style="background:#cbd5e1;"' : ''}>
+                            ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const currentQty = cart[productId] || 0;
+
+            if (product.stock > currentQty) {
+                cart[productId] = currentQty + 1;
+                updateCartUI();
+            } else {
+                alert(`Cannot add item. Only ${product.stock} units remaining.`);
+            }
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-items-container');
+            const totalDisplay = document.getElementById('cart-total-display');
+            
+            if (Object.keys(cart).length === 0) {
+                container.innerHTML = '<p style="color: #64748b;">Your cart is currently empty.</p>';
+                totalDisplay.innerText = 'Total: ₹0.00 INR';
+                return;
+            }
+
+            container.innerHTML = '';
+            let runningTotal = 0;
+
+            for (const [id, qty] of Object.entries(cart)) {
+                const item = products.find(p => p.id === id);
+                const itemSubtotal = item.price * qty;
+                runningTotal += itemSubtotal;
+
+                container.innerHTML += `
+                    <div class="cart-item">
+                        <div>
+                            <strong>${item.name}</strong><br>
+                            <small>₹${item.price.toLocaleString('en-IN')} x ${qty}</small>
+                        </div>
+                        <div>₹${itemSubtotal.toLocaleString('en-IN')}</div>
+                    </div>
+                `;
+            }
+            totalDisplay.innerText = `Total: ₹${runningTotal.toLocaleString('en-IN')} INR`;
+        }
+
+        async function processCheckout() {
+            if (Object.keys(cart).length === 0) {
+                alert("Your shopping cart is empty.");
+                return;
+            }
+
+            let baseTotal = 0;
+            for (const [id, qty] of Object.entries(cart)) {
+                const item = products.find(p => p.id === id);
+                baseTotal += item.price * qty;
+            }
+
+            const isPremium = document.getElementById('promo-check').checked;
+            let discount = isPremium ? baseTotal * 0.10 : 0;
+            let targetBase = baseTotal - discount;
+
+            const selectedCurrency = document.getElementById('currency-select').value;
+            let exchangeRate = 1.0;
+
+            // Fetch live currency processing rates based on standard exchange APIs with base INR
+            try {
+                const response = await fetch('https://open.er-api.com/v6/latest/INR');
+                if (response.ok) {
+                    const data = await response.json();
+                    exchangeRate = data.rates[selectedCurrency] || 1.0;
+                }
+            } catch (error) {
+                console.warn("API Offline fallback initialized.");
+            }
+
+            let finalBillAmount = targetBase * exchangeRate;
+
+            for (const [id, qty] of Object.entries(cart)) {
+                const item = products.find(p => p.id === id);
+                item.stock -= qty;
+            }
+
+            const invoiceDiv = document.getElementById('invoice');
+            const detailsDiv = document.getElementById('invoice-details');
+            
+            detailsDiv.innerHTML = `
+                <p><strong>Order Reference:</strong> #BHRT-${Math.floor(Math.random() * 9000 + 1000)}</p>
+                <p><strong>Base Total:</strong> ₹${baseTotal.toLocaleString('en-IN')}</p>
+                ${isPremium ? `<p style="color:crimson;"><strong>10% Member Discount:</strong> -₹${discount.toLocaleString('en-IN')}</p>` : ''}
+                <p><strong>Exchange Rate:</strong> 1 INR = ${exchangeRate.toFixed(4)} ${selectedCurrency}</p>
+                <hr style="border:none; border-top:1px solid #bbf7d0;">
+                <h3 style="margin:0; color:var(--dark);">Amount Settled: ${selectedCurrency} ${finalBillAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h3>
+            `;
+            
+            invoiceDiv.style.display = 'block';
+            cart = {};
+            updateCartUI();
+            renderCatalog();
+        }
+
+        renderCatalog();
+    </script>
+</body>
+</html>
